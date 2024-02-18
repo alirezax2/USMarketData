@@ -1,10 +1,13 @@
 import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import os, time
 
 
-pd.read_csv('tcikers.csv')
+DF = pd.read_csv('tickers.csv')
 
 
-def getPolygonDF(ticker , startdate , enddate , intervalperiod , window, window2):
+def getPolygonDF(ticker , startdate , enddate , intervalperiod ):
     import json
     import time
     import pandas as pd
@@ -39,6 +42,27 @@ def getPolygonDF(ticker , startdate , enddate , intervalperiod , window, window2
         except:
             break
     DF = pd.concat(dflst)
-    DF['SMA'] = DF.c.rolling(window=window).mean()
-    DF['SMA2'] = DF.c.rolling(window=window2).mean()
     return DF
+
+
+# Define the start and end dates for the last 2 years
+end_date = datetime.now()
+start_date = end_date - timedelta(days=2*365)
+
+for ticker in list(DF.Ticker):
+    print(ticker)
+
+    current_date = start_date
+    # Loop through each day in the last 2 years
+    while current_date <= end_date:
+        # Check if the current date is a weekday (Monday to Friday)
+        if current_date.weekday() < 5:
+            print(f"{current_date.strftime('%Y-%m-%d')} is a business day")
+            current_datestr = current_date.strftime('%Y-%m-%d')
+            if not os.path.exists(f'data\{current_datestr}'):
+                os.makedirs(f'data\{current_datestr}')
+            time.sleep(15)     #limitation free api
+            df = getPolygonDF(ticker=ticker, startdate=current_datestr, enddate=current_datestr, intervalperiod='1')
+            df.to_csv(f'data\{current_datestr}\{ticker}.csv')
+        # Move to the next day
+        current_date += timedelta(days=1)
