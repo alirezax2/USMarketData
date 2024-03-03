@@ -2,3 +2,5 @@ pandas
 panel
 hvplot
 bokeh
+scikit-learn==1.4.1.post1
+tslearn==0.6.3
